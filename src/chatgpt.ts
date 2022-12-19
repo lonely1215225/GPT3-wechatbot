@@ -79,6 +79,12 @@ export class ChatGPTBot {
             isPrivateChat ? this.chatgptTriggerKeyword : this.chatGroupTriggerKeyword,
             ""
         );
+        let punctuation = ",.;!?，。！？、…";
+        let lastStr = text.at(text.length - 1);
+        console.log(lastStr)
+        if (lastStr != undefined && !punctuation.includes(lastStr)) {
+            text = text + "?";
+        }
         return text;
     }
 
@@ -196,6 +202,7 @@ export class ChatGPTBot {
         // clean the message for ChatGPT input
         const text = this.cleanMessage(rawText, isPrivateChat);
         // reply to private or group chat
+        console.log("send to gpt:"+text)
         if (isPrivateChat && messageType == MessageType.Text) {
             return await this.onPrivateMessage(talker, text);
         } else if (room != undefined) {
