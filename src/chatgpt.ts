@@ -196,15 +196,15 @@ export class ChatGPTBot {
         // clean the message for ChatGPT input
         const text = this.cleanMessage(rawText, isPrivateChat);
         // reply to private or group chat
-        if (isPrivateChat) {
+        if (isPrivateChat && messageType == MessageType.Text) {
             return await this.onPrivateMessage(talker, text);
-        } else {
+        } else if (room != undefined) {
             return await this.onGroupMessage(text, room);
         }
     }
 
     async onInviteIn(room: users.Room, inviteeList: any[], inviter: users.Contact) {
-        if (!Config.welcomeToGroup){
+        if (!Config.welcomeToGroup) {
             return;
         }
         console.log('bot room-join room id:', room.id)
