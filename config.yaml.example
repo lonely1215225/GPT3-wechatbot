@@ -1,0 +1,4 @@
+openaiApiKey: "sk-"
+openaiOrganizationID: "org-XXXXXXXXXXXXXXX"
+chatgptTriggerKeyword: "Hi bot:"
+welcomeToGroup: true
