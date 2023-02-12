@@ -226,7 +226,7 @@ export class ChatGPTBot {
             if (myMap.get(talker.id) == undefined) {
                 myMap.set(talker.id, text);
             } else {
-                myMap.set(talker.id, myMap.get(talker.id) + "\n" + text);
+                myMap.set(talker.id, myMap.get(talker.id) + "\n\n" + text);
             }
 
             let longText = myMap.get(talker.id);
@@ -257,7 +257,7 @@ export class ChatGPTBot {
                 if (myMap.get(room.id) == undefined) {
                     myMap.set(room.id, text);
                 } else {
-                    myMap.set(room.id, myMap.get(room.id) + "\n" + text);
+                    myMap.set(room.id, myMap.get(room.id) + "\n\n" + text);
                 }
 
                 let longText = myMap.get(room.id);
