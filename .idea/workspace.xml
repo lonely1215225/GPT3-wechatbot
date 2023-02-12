@@ -5,16 +5,35 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b02bc213-235f-46cd-9123-9ee6cd2ebd87" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/WechatIMG82.jpeg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/GPT3-wechatbot.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GPT3-wechatbot.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/chatgpt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/chatgpt.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Solidity Contract" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2J7YoOT3rHiElaRjgecnJnEcWpf" />
   <component name="ProjectLevelVcsManager">
@@ -34,17 +53,26 @@
     "RunOnceActivity.go.migrated.go.modules.settings": "true",
     "WebServerToolWindowFactoryState": "false",
     "go.import.settings.migrated": "true",
-    "last_opened_file_path": "/Users/taichiman/IdeaProjects/GPT3-wechatbot",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/taichiman/IdeaProjects/GPT3-wechatbot/src",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
     </key>
   </component>
@@ -56,7 +84,17 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1671430763432</updated>
-      <workItem from="1671430765394" duration="14861000" />
+      <workItem from="1671430765394" duration="15683000" />
+      <workItem from="1671592240794" duration="999000" />
+      <workItem from="1671595072120" duration="790000" />
+      <workItem from="1672048743759" duration="1020000" />
+      <workItem from="1672221830639" duration="1924000" />
+      <workItem from="1672383427452" duration="1760000" />
+      <workItem from="1672386398670" duration="11484000" />
+      <workItem from="1672741013893" duration="1964000" />
+      <workItem from="1673504684462" duration="2476000" />
+      <workItem from="1674305658898" duration="5046000" />
+      <workItem from="1676009329262" duration="52268000" />
     </task>
     <servers />
   </component>

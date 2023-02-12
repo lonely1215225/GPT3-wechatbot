@@ -1,7 +1,6 @@
 import QRCode from "qrcode";
 import {WechatyBuilder} from "wechaty";
 import {ChatGPTBot} from "./chatgpt.js";
-
 // Wechaty instance
 const weChatBot = WechatyBuilder.build({
     name: "my-wechat-bot",
@@ -35,17 +34,22 @@ async function main() {
                     await message.say("World!");
                     return;
                 }
+                if (message.text().startsWith("假期")) {
+                    await chatGPTBot.setHoliday(message)
+                    return;
+                }
                 // handle message for chatGPT bot
                 await chatGPTBot.onMessage(message);
             } catch (e) {
                 console.error(`❌ ${e}`);
             }
         }).on('room-join', async function (room, inviteeList, inviter) {
-        await chatGPTBot.onInviteIn(room,inviteeList,inviter);
+        await chatGPTBot.onInviteIn(room, inviteeList, inviter);
     });
 
     try {
         await weChatBot.start();
+
     } catch (e) {
         console.error(`❌ Your Bot failed to start: ${e}`);
         console.log(

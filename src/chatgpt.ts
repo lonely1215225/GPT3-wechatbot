@@ -1,10 +1,14 @@
 import {Config} from "./config.js";
+// @ts-ignore
 import {Message, users} from "wechaty";
 import {ContactInterface, RoomInterface} from "wechaty/impls";
 import {Configuration, OpenAIApi} from "openai";
+import request from "http";
+import {FileBox} from 'file-box';
+
 
 // ChatGPT error response configuration
-const chatgptErrorMessage = "🤖️：麦扣的机器人摆烂了，请稍后再试～";
+const chatgptErrorMessage = "🤖️：机器人摆烂了，我可不背锅，这是openai的偶现问题，在尝试一次就好啦~";
 
 // ChatGPT model configuration
 // please refer to the OpenAI API doc: https://beta.openai.com/docs/api-reference/introduction
@@ -15,6 +19,7 @@ const ChatGPTModelConfig = {
     temperature: 0.9,
     max_tokens: 2000,
 };
+let myMap = new Map();
 
 // message size for a single reply by the bot
 const SINGLE_MESSAGE_MAX_SIZE = 500;
@@ -44,6 +49,51 @@ export class ChatGPTBot {
     chatgptTriggerKeyword = Config.chatgptTriggerKeyword;
     OpenAIConfig: any;  // OpenAI API key
     OpenAI: any;        // OpenAI API instance
+
+    async setHoliday(message: Message) {
+        request.get("http://127.0.0.1:8080/holiday/info", res => {
+            const {statusCode} = res;
+            const contentType = res.headers['content-type'];
+
+            let error;
+            // Any 2xx status code signals a successful response but
+            // here we're only checking for 200.
+            if (statusCode !== 200) {
+                error = new Error('Request Failed.\n' +
+                    `Status Code: ${statusCode}`);
+            } else if (!/^application\/json/.test(<string>contentType)) {
+            }
+            if (error) {
+                console.error(error.message);
+                // Consume response data to free up memory
+                res.resume();
+                return;
+            }
+
+            res.setEncoding('utf8');
+            let rawData = '';
+            res.on('data', (chunk) => {
+                rawData += chunk;
+            });
+            res.on('end', () => {
+                try {
+                    var room = message.room();
+                    if (!room && message.type() == MessageType.Text) {
+                        this.onPrivateMessage(message.talker(), rawData, false);
+                    } else if (room != undefined) {
+                        this.onGroupMessage(rawData, room, false);
+                    }
+                    return rawData;
+                } catch (e) {
+                    // @ts-ignore
+                    console.error(e.message);
+                }
+            });
+        }).on('error', (e) => {
+            console.error(`Got error: ${e.message}`);
+        });
+        return "";
+    }
 
     setBotName(botName: string) {
         this.botName = botName;
@@ -79,12 +129,6 @@ export class ChatGPTBot {
             isPrivateChat ? this.chatgptTriggerKeyword : this.chatGroupTriggerKeyword,
             ""
         );
-        let punctuation = ",.;!?，。！？、…";
-        let lastStr = text.at(text.length - 1);
-        console.log(lastStr)
-        if (lastStr != undefined && !punctuation.includes(lastStr)) {
-            text = text + "?";
-        }
         return text;
     }
 
@@ -94,10 +138,10 @@ export class ChatGPTBot {
         let triggered = false;
         if (isPrivateChat) {
             triggered = chatgptTriggerKeyword
-                ? text.startsWith(chatgptTriggerKeyword)
+                ? text.includes(chatgptTriggerKeyword)
                 : true;
         } else {
-            triggered = text.startsWith(this.chatGroupTriggerKeyword);
+            triggered = text.includes(this.chatGroupTriggerKeyword);
         }
         if (triggered) {
             console.log(`🎯 ChatGPT Triggered: ${text}`);
@@ -113,7 +157,7 @@ export class ChatGPTBot {
     ): boolean {
         return (
             // self-chatting can be used for testing
-            talker.self() ||
+            // talker.self() ||
             messageType > MessageType.GroupNote ||
             talker.name() == "微信团队" ||
             // video or voice reminder
@@ -126,10 +170,10 @@ export class ChatGPTBot {
     }
 
     // send question to ChatGPT with OpenAI API and get answer
-    async onChatGPT(inputMessage: string): Promise<string> {
+    async onChatGPT(inputMessage: string): Promise<String> {
         try {
             // config OpenAI API request body
-            const response = await this.OpenAI.createCompletion({
+            let response = await this.OpenAI.createCompletion({
                 ...ChatGPTModelConfig,
                 prompt: inputMessage,
             });
@@ -137,6 +181,7 @@ export class ChatGPTBot {
             const chatgptReplyMessage = response?.data?.choices[0]?.text?.trim();
             console.log("🤖️ ChatGPT says: ", chatgptReplyMessage);
             return chatgptReplyMessage;
+
         } catch (e: any) {
             const errorResponse = e?.response;
             const errorCode = errorResponse?.status;
@@ -151,7 +196,7 @@ export class ChatGPTBot {
     // reply with the segmented messages from a single-long message
     async reply(
         talker: RoomInterface | ContactInterface,
-        mesasge: string
+        mesasge: any
     ): Promise<void> {
         const messages: Array<string> = [];
         let message = mesasge;
@@ -166,20 +211,86 @@ export class ChatGPTBot {
     }
 
     // reply to private message
-    async onPrivateMessage(talker: ContactInterface, text: string) {
+    async onPrivateMessage(talker: ContactInterface, text: string, gpt: boolean) {
+        if (text.includes("清空上下文")) {
+            myMap.delete(talker.id);
+            return;
+        }
         // get reply from ChatGPT
-        const chatgptReplyMessage = await this.onChatGPT(text);
+        let chatgptReplyMessage;
+        if (gpt) {
+            if (text.includes("img")) {
+                await this.handleImgMessage(text, talker);
+                return;
+            }
+            if (myMap.get(talker.id) == undefined) {
+                myMap.set(talker.id, text);
+            } else {
+                myMap.set(talker.id, myMap.get(talker.id) + "\n" + text);
+            }
+
+            let longText = myMap.get(talker.id);
+            chatgptReplyMessage = await this.onChatGPT(longText);
+        } else {
+            chatgptReplyMessage = text;
+        }
         // send the ChatGPT reply to chat
         await this.reply(talker, chatgptReplyMessage);
     }
 
     // reply to group message
-    async onGroupMessage(text: string, room: RoomInterface) {
+    async onGroupMessage(text: string, room: RoomInterface, gpt: boolean) {
+        if (text.includes("清空上下文")) {
+            myMap.delete(room.id);
+            return;
+        }
         // get reply from ChatGPT
-        const chatgptReplyMessage = await this.onChatGPT(text);
+        let chatgptReplyMessage;
+
+        let result;
+        if (gpt) {
+            const txt = text.replace(" ", "");
+            if (txt.includes("img")) {
+                await this.handleImgMessage(text, room);
+                return;
+            } else {
+                if (myMap.get(room.id) == undefined) {
+                    myMap.set(room.id, text);
+                } else {
+                    myMap.set(room.id, myMap.get(room.id) + "\n" + text);
+                }
+
+                let longText = myMap.get(room.id);
+
+                let punctuation = ",.;!?，。！？、…";
+                let lastStr = longText.at(longText.length - 1);
+                if (lastStr != undefined && !punctuation.includes(lastStr)) {
+                    longText = longText + "?";
+                }
+                console.log("send to gpt:" + longText);
+                chatgptReplyMessage = await this.onChatGPT(longText);
+                result = `${text}\n ---------- \n ${chatgptReplyMessage}`;
+            }
+        } else {
+            result = text;
+        }
         // the reply consist of: original text and bot reply
-        const result = `${text}\n ---------- \n ${chatgptReplyMessage}`;
         await this.reply(room, result);
+    }
+
+    async handleImgMessage(text: string, room: RoomInterface | ContactInterface) {
+        const s = text.substring(4);
+        let response = await this.OpenAI.createImage({
+            prompt: s.replace("?", "").toString(),
+            size: "512x512"
+        });
+        const url = response.data.data[0].url;
+        console.log(url)
+        const fileBox = FileBox.fromUrl(url);
+        await room.say(fileBox);
+        console.log("图片已发送")
+        return;
+
     }
 
     // receive a message (main entry)
@@ -201,12 +312,13 @@ export class ChatGPTBot {
         }
         // clean the message for ChatGPT input
         const text = this.cleanMessage(rawText, isPrivateChat);
+
         // reply to private or group chat
-        console.log("send to gpt:"+text)
+        console.log("send to gpt:" + text)
         if (isPrivateChat && messageType == MessageType.Text) {
-            return await this.onPrivateMessage(talker, text);
+            return await this.onPrivateMessage(talker, text, true);
         } else if (room != undefined) {
-            return await this.onGroupMessage(text, room);
+            return await this.onGroupMessage(text, room, true);
         }
     }
 
