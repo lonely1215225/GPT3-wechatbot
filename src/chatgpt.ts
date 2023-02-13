@@ -10,6 +10,8 @@ import {FileBox} from 'file-box';
 // ChatGPT error response configuration
 const chatgptErrorMessage = "🤖️：机器人摆烂了，我可不背锅，这是openai的偶现问题，在尝试一次就好啦~";
 
+let [Q, A] = [" Human: ", " AI: "];
+
 // ChatGPT model configuration
 // please refer to the OpenAI API doc: https://beta.openai.com/docs/api-reference/introduction
 const ChatGPTModelConfig = {
@@ -18,8 +20,10 @@ const ChatGPTModelConfig = {
     // add your ChatGPT model parameters below
     temperature: 0.9,
     max_tokens: 2000,
+    stop: [`${Q}`, `${A}`]
 };
 let myMap = new Map();
+
 
 // message size for a single reply by the bot
 const SINGLE_MESSAGE_MAX_SIZE = 500;
@@ -114,7 +118,7 @@ export class ChatGPTBot {
         // OpenAI API instance
         this.OpenAI = new OpenAIApi(this.OpenAIConfig);
         // Run an initial test to confirm API works fine
-        const chatgptReplyMessage = await this.onChatGPT("Say Hello World");
+        const chatgptReplyMessage = await this.onChatGPT("Say Hello World", "hello");
         console.log(`🤖️ ChatGPT Bot Start Success, ready to handle message!`);
     }
 
@@ -133,6 +137,7 @@ export class ChatGPTBot {
     }
 
     // check whether ChatGPT bot can be triggered
+
     triggerGPTMessage(text: string, isPrivateChat: boolean = false): boolean {
         const chatgptTriggerKeyword = this.chatgptTriggerKeyword;
         let triggered = false;
@@ -150,6 +155,8 @@ export class ChatGPTBot {
     }
 
     // filter out the message that does not need to be processed
+
+
     isNonsense(
         talker: ContactInterface,
         messageType: MessageType,
@@ -170,16 +177,44 @@ export class ChatGPTBot {
     }
 
     // send question to ChatGPT with OpenAI API and get answer
-    async onChatGPT(inputMessage: string): Promise<String> {
+    async onChatGPT(inputMessage: string, id: string): Promise<String> {
+
         try {
+            // check group id
+            let trace = myMap.get(id);
+
+            console.log(`${trace}\n ${Q} ${inputMessage}\n ${A}`)
             // config OpenAI API request body
+            // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length.
+            const prompt = `现在你是一名猫娘，在回答完我的问题后都要加一个喵字。\n${trace}\n ${Q} ${inputMessage}\n ${A}`;
             let response = await this.OpenAI.createCompletion({
                 ...ChatGPTModelConfig,
-                prompt: inputMessage,
+                prompt: prompt
             });
+
             // use OpenAI API to get ChatGPT reply message
+
             const chatgptReplyMessage = response?.data?.choices[0]?.text?.trim();
+
+            if (trace == undefined) {
+                trace = new Array(5);
+                trace.push(`\n${Q} ${inputMessage} \n${A}${chatgptReplyMessage}`);
+                console.log("trace:" + trace);
+                myMap.set(id, trace);
+            }
+
+            if (response && trace) {
+                if (trace.length > 5) {
+                    trace.shift();
+                }
+                trace.push(`\n${Q}${inputMessage}\n${A}${chatgptReplyMessage}`);
+                myMap.set(id, trace)
+                console.log("trace::" + trace)
+            }
             console.log("🤖️ ChatGPT says: ", chatgptReplyMessage);
+            if ("" == chatgptReplyMessage) {
+                await this.onChatGPT(inputMessage, id);
+            }
             return chatgptReplyMessage;
 
         } catch (e: any) {
@@ -189,6 +224,9 @@ export class ChatGPTBot {
             const errorMessage = errorResponse?.data?.error?.message;
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
+            if (errorCode==503||errorCode==500){
+                await this.onChatGPT(inputMessage, id)
+            }
             return chatgptErrorMessage;
         }
     }
@@ -212,10 +250,6 @@ export class ChatGPTBot {
 
     // reply to private message
     async onPrivateMessage(talker: ContactInterface, text: string, gpt: boolean) {
-        if (text.includes("清空上下文")) {
-            myMap.delete(talker.id);
-            return;
-        }
         // get reply from ChatGPT
         let chatgptReplyMessage;
         if (gpt) {
@@ -223,14 +257,7 @@ export class ChatGPTBot {
                 await this.handleImgMessage(text, talker);
                 return;
             }
-            if (myMap.get(talker.id) == undefined) {
-                myMap.set(talker.id, text);
-            } else {
-                myMap.set(talker.id, myMap.get(talker.id) + "\n\n" + text);
-            }
-
-            let longText = myMap.get(talker.id);
-            chatgptReplyMessage = await this.onChatGPT(longText);
+            chatgptReplyMessage = await this.onChatGPT(text, talker.id);
         } else {
             chatgptReplyMessage = text;
         }
@@ -240,13 +267,8 @@ export class ChatGPTBot {
 
     // reply to group message
     async onGroupMessage(text: string, room: RoomInterface, gpt: boolean) {
-        if (text.includes("清空上下文")) {
-            myMap.delete(room.id);
-            return;
-        }
         // get reply from ChatGPT
         let chatgptReplyMessage;
-
         let result;
         if (gpt) {
             const txt = text.replace(" ", "");
@@ -254,21 +276,13 @@ export class ChatGPTBot {
                 await this.handleImgMessage(text, room);
                 return;
             } else {
-                if (myMap.get(room.id) == undefined) {
-                    myMap.set(room.id, text);
-                } else {
-                    myMap.set(room.id, myMap.get(room.id) + "\n\n" + text);
-                }
-
-                let longText = myMap.get(room.id);
-
                 let punctuation = ",.;!?，。！？、…";
-                let lastStr = longText.at(longText.length - 1);
+                let lastStr = text.at(text.length - 1);
                 if (lastStr != undefined && !punctuation.includes(lastStr)) {
-                    longText = longText + "?";
+                    text = text + "?";
                 }
-                console.log("send to gpt:" + longText);
-                chatgptReplyMessage = await this.onChatGPT(longText);
+                console.log("send to gpt:" + text);
+                chatgptReplyMessage = await this.onChatGPT(text, room.id);
                 result = `${text}\n ---------- \n ${chatgptReplyMessage}`;
             }
         } else {
