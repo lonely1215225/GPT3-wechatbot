@@ -10,7 +10,7 @@ import {FileBox} from 'file-box';
 // ChatGPT error response configuration
 const chatgptErrorMessage = "🤖️：机器人摆烂了，我可不背锅，这是openai的偶现问题，在尝试一次就好啦~";
 
-let [Q, A] = [" Human: ", " AI: "];
+let [Q, A] = ["Human: ", "AI: "];
 
 // ChatGPT model configuration
 // please refer to the OpenAI API doc: https://beta.openai.com/docs/api-reference/introduction
@@ -213,7 +213,7 @@ export class ChatGPTBot {
             }
             console.log("🤖️ ChatGPT says: ", chatgptReplyMessage);
             if ("" == chatgptReplyMessage) {
-                await this.onChatGPT(inputMessage, id);
+                return await this.onChatGPT(inputMessage, id);
             }
             return chatgptReplyMessage;
 
@@ -224,8 +224,8 @@ export class ChatGPTBot {
             const errorMessage = errorResponse?.data?.error?.message;
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
-            if (errorCode==503||errorCode==500){
-                await this.onChatGPT(inputMessage, id)
+            if (errorCode == 503 || errorCode == 500) {
+                return await this.onChatGPT(inputMessage, id)
             }
             return chatgptErrorMessage;
         }
