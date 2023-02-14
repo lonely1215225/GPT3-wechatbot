@@ -1,0 +1,41 @@
+
+> chatgpt-on-wechat@1.0.0 dev
+> nodemon --exec node --watch config.yaml --loader ts-node/esm src/main.ts
+
+[33m[nodemon] 2.0.20[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): config.yaml[39m
+[33m[nodemon] watching extensions: ts[39m
+[32m[nodemon] starting `node --loader ts-node/esm src/main.ts`[39m
+(node:19412) ExperimentalWarning: Custom ESM Loaders is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> chatgpt-on-wechat@1.0.0 dev
+> nodemon --exec node --watch config.yaml --loader ts-node/esm src/main.ts
+
+[33m[nodemon] 2.0.20[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): config.yaml[39m
+[33m[nodemon] watching extensions: ts[39m
+[32m[nodemon] starting `node --loader ts-node/esm src/main.ts`[39m
+(node:24638) ExperimentalWarning: Custom ESM Loaders is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+💡 Scan QR Code to login: 2
+https://wechaty.js.org/qrcode/https%3A%2F%2Flogin.weixin.qq.com%2Fl%2FAdwD_go0ZQ%3D%3D
+[47m[30m ▄▄▄▄▄▄▄  ▄  ▄▄▄▄   ▄  ▄▄▄▄▄▄▄ [0m
+[47m[30m █ ▄▄▄ █ ▀ █▄  ▀█▀▀ ▀█ █ ▄▄▄ █ [0m
+[47m[30m █ ███ █ ▄█▀▀█  █ ▄▄█▀ █ ███ █ [0m
+[47m[30m █▄▄▄▄▄█ ▄▀▄▀█▀▄▀█ █▀▄ █▄▄▄▄▄█ [0m
+[47m[30m ▄ ▄ ▄ ▄  ▄▄█ ▀ ▄▀█ ▄█   ▄  ▄  [0m
+[47m[30m  █▄▀▄▄▄  █ ▄▄▄█▀██▄ ▄█▀▄▄▀▄▄█ [0m
+[47m[30m ▄▀  ██▄ █▄█ ▄▀ ▀██▀▄█▀█▀▀▄ █▄ [0m
+[47m[30m ▄▀▀▄▀▄▄▀▀▀▄ ▄▀█▀▀▄  ▀█▀▄ █ ▄█ [0m
+[47m[30m ▀▀█ █▀▄█▄▄▄▀▄██ ▀█▀█▄██  █ █▄ [0m
+[47m[30m ▄ ▄▄▀▀▄█▄▀ ▄▄ ▀ █   █▄█▄ ▀▀▄█ [0m
+[47m[30m ▄▀█ ▄ ▄▄ ▀█▄███▀████▄▄█▄█▀ ▀  [0m
+[47m[30m ▄▄▄▄▄▄▄ ▀ ▄█▀ ▀ ▀▄ ▄█ ▄ █▄▀██ [0m
+[47m[30m █ ▄▄▄ █ ▄█▄█ ▀█▀▄█▀ █▄▄▄█▀ ▀▀ [0m
+[47m[30m █ ███ █ ▄▀█    ▀▀      ██▄▀▀█ [0m
+[47m[30m █▄▄▄▄▄█ ▄▀▄▀██▀▄██▄██▄▄█   █▄ [0m
+[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m[37m▀[47m[30m[0m
+[47m[30m[0m

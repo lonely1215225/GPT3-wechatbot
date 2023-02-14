@@ -20,7 +20,7 @@ const ChatGPTModelConfig = {
     // add your ChatGPT model parameters below
     temperature: 0.9,
     max_tokens: 2000,
-    presence_penalty:0.6,
+    presence_penalty: 0.6,
     stop: [`${Q}`, `${A}`]
 };
 let myMap = new Map();
@@ -181,7 +181,7 @@ export class ChatGPTBot {
     async onChatGPT(inputMessage: string, id: string): Promise<String> {
 
         if (inputMessage.includes("identity:")) {
-            identity = inputMessage;
+            identity = inputMessage.replace("identity:", "");
         }
         try {
             // check group id
