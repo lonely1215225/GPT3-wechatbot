@@ -179,10 +179,6 @@ export class ChatGPTBot {
 
     // send question to ChatGPT with OpenAI API and get answer
     async onChatGPT(inputMessage: string, id: string): Promise<String> {
-
-        if (inputMessage.includes("identity:")) {
-            identity = inputMessage.replace("identity:", "");
-        }
         try {
             // check group id
             let trace = myMap.get(id);
@@ -333,6 +329,12 @@ export class ChatGPTBot {
 
         // reply to private or group chat
         console.log("send to gpt:" + text)
+        if (text.includes("identity:")) {
+            identity = text.replace("identity:", "");
+            console.log("现在我的身份规则是:" + identity)
+            return;
+        }
+
         if (isPrivateChat && messageType == MessageType.Text) {
             return await this.onPrivateMessage(talker, text, true);
         } else if (room != undefined) {
