@@ -186,6 +186,7 @@ export class ChatGPTBot {
             console.log(`${trace}\n ${Q} ${inputMessage}\n ${A}`)
             // config OpenAI API request body
             // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length.
+
             const prompt = `${identity} \n${trace}\n ${Q} ${inputMessage}\n ${A}`;
             let response = await this.OpenAI.createCompletion({
                 ...ChatGPTModelConfig,
@@ -201,9 +202,11 @@ export class ChatGPTBot {
                 trace.push(`\n${Q} ${inputMessage} \n${A}${chatgptReplyMessage}`);
                 console.log("trace:" + trace);
                 myMap.set(id, trace);
-            }
-
-            if (response && trace) {
+            } else if (response && trace) {
+                const totalRequest = trace + "";
+                if (totalRequest.length > 2000) {
+                    trace = new Array(5);
+                }
                 if (trace.length > 5) {
                     trace.shift();
                 }
