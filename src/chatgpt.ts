@@ -181,7 +181,7 @@ export class ChatGPTBot {
     async onChatGPT(inputMessage: string, id: string): Promise<String> {
 
         if (inputMessage.includes("/cc")) {
-            myMap.set(id, "");
+            myMap.set(id, new Array(5));
             return "上下文已清理!";
         }
         try {
@@ -193,6 +193,7 @@ export class ChatGPTBot {
             // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length.
 
             const prompt = `\n${trace}\n ${Q} ${inputMessage}\n ${A}`;
+            console.log("send to gpt::" + prompt)
             let response = await this.OpenAI.createCompletion({
                 ...ChatGPTModelConfig,
                 prompt: prompt
@@ -235,6 +236,10 @@ export class ChatGPTBot {
             console.log(`❌ ${errorMessage}`);
             if (errorCode == 503 || errorCode == 500) {
                 return await this.onChatGPT(inputMessage, id)
+            }
+            if (errorCode == 400) {
+                myMap.set(id, new Array(5));
+                return await this.onChatGPT(inputMessage, id);
             }
             return chatgptErrorMessage;
         }
