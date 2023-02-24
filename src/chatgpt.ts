@@ -308,14 +308,61 @@ export class ChatGPTBot {
 
     async handleImgMessage(text: string, room: RoomInterface | ContactInterface) {
         const s = text.substring(4);
-        let response = await this.OpenAI.createImage({
-            prompt: s.replace("?", "").toString(),
-            size: "512x512"
+
+        const prompt = s.replace("?", "").toString()
+        let payload = {
+            "prompt": prompt,
+            "steps": 20
+        }
+        const postData = JSON.stringify(payload);
+
+        const options = {
+            hostname: "9.134.172.52",
+            port: 7860,
+            path: '/sdapi/v1/txt2img',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(postData)
+            },
+            body: payload
+        };
+        const req = request.request(options, (res) => {
+            console.log(`STATUS: ${res.statusCode}`);
+            console.log(`HEADERS: ${JSON.stringify(res.headers)}`);
+            res.setEncoding('utf8');
+            let resp: string;
+            res.on('data', (chunk) => {
+                resp += chunk;
+            });
+            res.on('end', async () => {
+                resp = JSON.parse(resp.replace("undefined", ""));
+                // @ts-ignore
+                resp = resp.images;
+
+                const fileBox = FileBox.fromBase64(resp + "")
+                await fileBox.toFile("./cat.png", true);
+                await room.say(FileBox.fromFile("./cat.png"));
+                console.log('No more data in response.');
+            });
         });
-        const url = response.data.data[0].url;
-        console.log(url)
-        const fileBox = FileBox.fromUrl(url);
-        await room.say(fileBox);
+
+        req.on('error', (e) => {
+            console.error(`problem with request: ${e.message}`);
+        });
+
+        // Write data to request body
+        req.write(postData);
+        req.end();
+
+        // const s = text.substring(4);
+        // let response = await this.OpenAI.createImage({
+        //     prompt: s.replace("?", "").toString(),
+        //     size: "512x512"
+        // });
+        // let url = response.data.data[0].url;
+        // console.log(url)
+        // const fileBox = FileBox.fromUrl(url);
         console.log("图片已发送")
         return;
 
