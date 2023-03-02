@@ -11,17 +11,16 @@ import {FileBox} from 'file-box';
 const chatgptErrorMessage = "🤖️：机器人摆烂了，我可不背锅，这是openai的偶现问题，在尝试一次就好啦~";
 
 let [Q, A] = ["Human: ", "AI: "];
-let identity = 'You are AI, a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.\n';
+let identity = 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possiboe.\nCurrent data:' + new Date().toLocaleString();
 // ChatGPT model configuration
 // please refer to the OpenAI API doc: https://beta.openai.com/docs/api-reference/introduction
 const ChatGPTModelConfig = {
     // this model field is required
-    model: "text-davinci-003",
+    model: "gpt-3.5-turbo",
     // add your ChatGPT model parameters below
     temperature: 0.9,
     max_tokens: 2000,
-    presence_penalty: 0.6,
-    stop: [`${Q}`, `${A}`]
+    presence_penalty: 0.6
 };
 let myMap = new Map();
 
@@ -184,48 +183,41 @@ export class ChatGPTBot {
             myMap.set(id, new Array(5));
             return "上下文已清理!";
         }
+        if (id == "hello") {
+            return "ok"
+        }
         try {
-            // check group id
-            let trace = myMap.get(id);
+            let cachedMsg = myMap.get(id);
+            if (!cachedMsg) {
+                cachedMsg=[];
+                cachedMsg.push({role: "system", content: `${identity}`})
+            }
+            cachedMsg.push({role: "user", content: inputMessage})
+            if (cachedMsg.length > 5) {
+                cachedMsg.shift();
+            }
 
-            console.log(`${trace}\n ${Q} ${inputMessage}\n ${A}`)
             // config OpenAI API request body
-            // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length.
+            // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length
 
-            const prompt = `\n${trace}\n ${Q} ${inputMessage}\n ${A}`;
+            const prompt = JSON.stringify(cachedMsg);
             console.log("send to gpt::" + prompt)
-            let response = await this.OpenAI.createCompletion({
-                ...ChatGPTModelConfig,
-                prompt: prompt
-            });
 
-            // use OpenAI API to get ChatGPT reply message
-
-            const chatgptReplyMessage = response?.data?.choices[0]?.text?.trim();
-
-            if (trace == undefined) {
-                trace = new Array(5);
-                trace.push(`\n${Q} ${inputMessage} \n${A}${chatgptReplyMessage}`);
-                console.log("trace:" + trace);
-                myMap.set(id, trace);
-            } else if (response && trace) {
-                const totalRequest = trace + "";
-
-                if (totalRequest.length > 1000) {
-                    trace = new Array(5);
+            const response = await this.OpenAI.createChatCompletion(
+                {
+                    ...ChatGPTModelConfig,
+                    messages: cachedMsg
                 }
-                if (trace.length > 5) {
-                    trace.shift();
-                }
-                trace.push(`\n${Q}${inputMessage}\n${A}${chatgptReplyMessage}`);
-                myMap.set(id, trace)
-                console.log("trace::" + trace)
-            }
-            console.log("🤖️ ChatGPT says: ", chatgptReplyMessage);
-            if ("" == chatgptReplyMessage) {
-                return await this.onChatGPT(inputMessage, id);
-            }
-            return chatgptReplyMessage;
+            );
+            const messageResp = response.data.choices[0].message;            // use OpenAI API to get ChatGPT reply message
+
+            console.log("🤖️ ChatGPT says: ", messageResp);
+
+            cachedMsg.push(messageResp);
+
+            myMap.set(id, cachedMsg);
+
+            return messageResp.content;
 
         } catch (e: any) {
             const errorResponse = e?.response;
@@ -234,13 +226,6 @@ export class ChatGPTBot {
             const errorMessage = errorResponse?.data?.error?.message;
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
-            if (errorCode == 503 || errorCode == 500) {
-                return await this.onChatGPT(inputMessage, id)
-            }
-            if (errorCode == 400) {
-                myMap.set(id, new Array(5));
-                return await this.onChatGPT(inputMessage, id);
-            }
             return chatgptErrorMessage;
         }
     }
@@ -312,7 +297,8 @@ export class ChatGPTBot {
         const prompt = s.replace("?", "").toString()
         let payload = {
             "prompt": prompt,
-            "steps": 20
+            "steps": 20,
+            "sampler_name": ""
         }
         const postData = JSON.stringify(payload);
 
