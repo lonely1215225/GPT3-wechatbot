@@ -180,19 +180,21 @@ export class ChatGPTBot {
     async onChatGPT(inputMessage: string, id: string): Promise<String> {
 
         if (inputMessage.includes("/cc")) {
-            myMap.set(id, new Array(5));
+            myMap.set(id, []);
             return "上下文已清理!";
         }
         if (id == "hello") {
             return "ok"
         }
+        let cachedMsg = myMap.get(id);
         try {
-            let cachedMsg = myMap.get(id);
             if (!cachedMsg) {
-                cachedMsg=[];
+                cachedMsg = [];
                 cachedMsg.push({role: "system", content: `${identity}`})
             }
             cachedMsg.push({role: "user", content: inputMessage})
+
+            console.log(cachedMsg.reduce((acc: any, cur: string | any[]) => acc + cur.length, 0));
             if (cachedMsg.length > 5) {
                 cachedMsg.shift();
             }
@@ -226,6 +228,12 @@ export class ChatGPTBot {
             const errorMessage = errorResponse?.data?.error?.message;
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
+            if (errorCode == 400) {
+                cachedMsg = [];
+                myMap.set(id, cachedMsg);
+                await this.onChatGPT(inputMessage, id);
+                cachedMsg.push({role: "system", content: `${identity}`})
+            }
             return chatgptErrorMessage;
         }
     }
