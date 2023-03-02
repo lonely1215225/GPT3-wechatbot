@@ -193,8 +193,6 @@ export class ChatGPTBot {
                 cachedMsg.push({role: "system", content: `${identity}`})
             }
             cachedMsg.push({role: "user", content: inputMessage})
-
-            console.log(cachedMsg.reduce((acc: any, cur: string | any[]) => acc + cur.length, 0));
             if (cachedMsg.length > 5) {
                 cachedMsg.shift();
             }
@@ -229,10 +227,9 @@ export class ChatGPTBot {
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
             if (errorCode == 400) {
-                cachedMsg = [];
+                cachedMsg.shift();
                 myMap.set(id, cachedMsg);
                 await this.onChatGPT(inputMessage, id);
-                cachedMsg.push({role: "system", content: `${identity}`})
             }
             return chatgptErrorMessage;
         }
