@@ -26,6 +26,7 @@ const ChatGPTModelConfig = {
     presence_penalty: 0.6
 };
 let myMap = new Map();
+const encoder = new TextEncoder();
 
 
 // message size for a single reply by the bot
@@ -202,22 +203,36 @@ export class ChatGPTBot {
             }
             // config OpenAI API request body
             // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length
+            const tem = [identity];
+            cachedMsg.push(msg)
 
-            const temp = [];
-            temp.push(identity);
-            const tem = temp.concat(cachedMsg);
-            tem.push(msg);
-            console.log(JSON.stringify(tem))
+            const message = tem.concat(cachedMsg);
+
+            let totalTokens = message.reduce((acc: any, curr: any) => {
+                const bytes = encoder.encode(curr.content);
+                return acc + bytes.length;
+            }, 0);
+
+            while (totalTokens > 2000) {
+                cachedMsg.shift();
+                totalTokens = cachedMsg.reduce((acc: any, curr: any) => {
+                    const bytes = encoder.encode(curr.content);
+                    return acc + bytes.length;
+                }, 0);
+                totalTokens += encoder.encode(identity.content).length;
+                console.log("优化后长度：" + totalTokens)
+            }
+
+            console.log(JSON.stringify(message))
             const response = await this.OpenAI.createChatCompletion(
                     {
                         ...ChatGPTModelConfig,
-                        messages: tem
+                        messages: message
                     }
                 )
             ;
             const messageResp = response.data.choices[0].message;            // use OpenAI API to get ChatGPT reply message
 
-            cachedMsg.push(msg)
             console.log("🤖️ ChatGPT says: ", messageResp);
 
             cachedMsg.push(messageResp);
@@ -234,7 +249,7 @@ export class ChatGPTBot {
             console.log(`❌ Code ${errorCode}: ${errorStatus}`);
             console.log(`❌ ${errorMessage}`);
             if (errorCode == 400) {
-                cachedMsg.shift();
+                cachedMsg = [];
                 myMap.set(id, cachedMsg);
                 await this.onChatGPT(inputMessage, id);
             }
@@ -312,10 +327,10 @@ export class ChatGPTBot {
         }).catch(err => {
             prompt = err;
         })
+        prompt = prompt + " <lora:koreanDollLikeness_v15:1>";
         let payload = {
             "prompt": prompt,
-            "steps": 20,
-            "sampler_name": ""
+            "steps": 25,
         }
         const postData = JSON.stringify(payload);
 
@@ -347,7 +362,7 @@ export class ChatGPTBot {
                 const fileBox = FileBox.fromBase64(resp + "")
                 await fileBox.toFile("./cat.png", true);
                 await room.say(FileBox.fromFile("./cat.png"));
-                console.log('No more data in response.');
+                console.log("图片已发送")
             });
         });
 
@@ -367,7 +382,6 @@ export class ChatGPTBot {
         // let url = response.data.data[0].url;
         // console.log(url)
         // const fileBox = FileBox.fromUrl(url);
-        console.log("图片已发送")
         return;
 
     }
