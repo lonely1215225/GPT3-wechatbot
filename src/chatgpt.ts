@@ -5,13 +5,16 @@ import {ContactInterface, RoomInterface} from "wechaty/impls";
 import {Configuration, OpenAIApi} from "openai";
 import request from "http";
 import {FileBox} from 'file-box';
+import translate from 'google-translate-api-x'
 
 
 // ChatGPT error response configuration
 const chatgptErrorMessage = "🤖️：机器人摆烂了，我可不背锅，这是openai的偶现问题，在尝试一次就好啦~";
-
-let [Q, A] = ["Human: ", "AI: "];
-let identity = 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possiboe.\nCurrent data:' + new Date().toLocaleString();
+let identityDefault = 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possiboe.\nCurrent data:' + new Date().toLocaleString();
+let identity = {
+    role: 'system',
+    content: 'You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possiboe.\nCurrent data:' + new Date().toLocaleString()
+};
 // ChatGPT model configuration
 // please refer to the OpenAI API doc: https://beta.openai.com/docs/api-reference/introduction
 const ChatGPTModelConfig = {
@@ -118,7 +121,7 @@ export class ChatGPTBot {
         // OpenAI API instance
         this.OpenAI = new OpenAIApi(this.OpenAIConfig);
         // Run an initial test to confirm API works fine
-        const chatgptReplyMessage = await this.onChatGPT(identity, "hello");
+        const chatgptReplyMessage = await this.onChatGPT(identityDefault, "hello");
         console.log(`🤖️ ChatGPT Bot Start Success, ready to handle message!`);
     }
 
@@ -187,30 +190,34 @@ export class ChatGPTBot {
             return "ok"
         }
         let cachedMsg = myMap.get(id);
+        if (inputMessage.includes("/identity")) {
+            identity = {role: 'system', content: inputMessage.substring(10)};
+            console.log("现在的身份是:" + identity)
+            return "as you wish!";
+        }
         try {
+            const msg = {role: "user", content: inputMessage};
             if (!cachedMsg) {
                 cachedMsg = [];
-                cachedMsg.push({role: "system", content: `${identity}`})
             }
-            cachedMsg.push({role: "user", content: inputMessage})
-            if (cachedMsg.length > 5) {
-                cachedMsg.shift();
-            }
-
             // config OpenAI API request body
             // This model's maximum context length is 4097 tokens, however you requested 4123 tokens (2123 in your prompt; 2000 for the completion). Please reduce your prompt; or completion length
 
-            const prompt = JSON.stringify(cachedMsg);
-            console.log("send to gpt::" + prompt)
-
+            const temp = [];
+            temp.push(identity);
+            const tem = temp.concat(cachedMsg);
+            tem.push(msg);
+            console.log(JSON.stringify(tem))
             const response = await this.OpenAI.createChatCompletion(
-                {
-                    ...ChatGPTModelConfig,
-                    messages: cachedMsg
-                }
-            );
+                    {
+                        ...ChatGPTModelConfig,
+                        messages: tem
+                    }
+                )
+            ;
             const messageResp = response.data.choices[0].message;            // use OpenAI API to get ChatGPT reply message
 
+            cachedMsg.push(msg)
             console.log("🤖️ ChatGPT says: ", messageResp);
 
             cachedMsg.push(messageResp);
@@ -299,13 +306,19 @@ export class ChatGPTBot {
     async handleImgMessage(text: string, room: RoomInterface | ContactInterface) {
         const s = text.substring(4);
 
-        const prompt = s.replace("?", "").toString()
+        let prompt = s.replace("?", "").toString()
+        await translate(prompt, {to: 'en'}).then(res => {
+            prompt = res.text;
+        }).catch(err => {
+            prompt = err;
+        })
         let payload = {
             "prompt": prompt,
             "steps": 20,
             "sampler_name": ""
         }
         const postData = JSON.stringify(payload);
+
 
         const options = {
             hostname: "9.134.172.52",
@@ -381,16 +394,6 @@ export class ChatGPTBot {
 
         // reply to private or group chat
         console.log("send to gpt:" + text)
-        if (text.includes("/identity")) {
-            identity = text.replace("identity:", "");
-            console.log("现在我的身份规则是:" + identity);
-            if (isPrivateChat && messageType == MessageType.Text) {
-                return await this.reply(talker, "as you wish!");
-            } else if (room != undefined) {
-                return await this.reply(room, "as you wish!");
-            }
-            return;
-        }
 
         if (isPrivateChat && messageType == MessageType.Text) {
             return await this.onPrivateMessage(talker, text, true);

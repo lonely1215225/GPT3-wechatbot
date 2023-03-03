@@ -13,6 +13,7 @@
   "dependencies": {
     "dotenv": "^16.0.3",
     "file-saver": "^2.0.5",
+    "google-translate-api-x": "^10.5.4",
     "nth-check": ">=2.0.1",
     "openai": "^3.2.1",
     "qrcode": "^1.5.1",
