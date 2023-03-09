@@ -4,6 +4,7 @@ import {ChatGPTBot} from "./chatgpt.js";
 // Wechaty instance
 const weChatBot = WechatyBuilder.build({
     name: "my-wechat-bot",
+    puppetOptions: {timeoutSeconds: 120}
 });
 // ChatGPTBot instance
 const chatGPTBot = new ChatGPTBot();
