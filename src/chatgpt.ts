@@ -334,17 +334,17 @@ export class ChatGPTBot {
             console.log(res.text)
             prompt = res.text;
         }).catch(err => {
-            prompt = err;
+            console.log(err)
         })
-        prompt = "masterpiece, best quality,highres," + prompt + " <lora:koreanDollLikeness_v15:0.7>";
+        prompt = "masterpiece, best quality, highres," + prompt + ", <lora:koreanDollLikeness_v15:0.6>"
         let payload = {
             "prompt": prompt,
-            "steps": 25,
+            "steps": 20,
             "sampler_index": "DPM++ 2M Karras",
             "cfg_scale": 9,
             "negative_prompt": "lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry, bad feet",
-            "width": 700,
-            "height": 700
+            "width": 800,
+            "height": 800
         }
         const postData = JSON.stringify(payload);
 
@@ -373,7 +373,7 @@ export class ChatGPTBot {
                 // @ts-ignore
                 resp = resp.images;
 
-                const fb = FileBox.fromBase64(resp + "","cat.png");
+                const fb = FileBox.fromBase64(resp + "", "cat.png");
                 await room.say(fb);
                 console.log("图片已发送")
             });
