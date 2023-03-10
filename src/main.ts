@@ -1,6 +1,7 @@
 import QRCode from "qrcode";
-import {WechatyBuilder} from "wechaty";
+import {Contact, WechatyBuilder} from "wechaty";
 import {ChatGPTBot} from "./chatgpt.js";
+import {Config} from "./config";
 // Wechaty instance
 const weChatBot = WechatyBuilder.build({
     name: "my-wechat-bot",
@@ -24,8 +25,8 @@ async function main() {
             );
         })
         // login to WeChat desktop account
-        .on("login", async (user: any) => {
-            console.log(`✅ User ${user} has logged in`);
+        .on("login", async (user: Contact) => {
+            console.log(`✅ User ${user.name()} has logged in`);
             chatGPTBot.setBotName(user.name());
             await chatGPTBot.startGPTBot();
         })

@@ -110,7 +110,7 @@ export class ChatGPTBot {
     }
 
     setBotName(botName: string) {
-        this.botName = botName;
+        this.botName = Config.botName;
     }
 
     // get trigger keyword in group chat: (@Name <keyword>)
@@ -143,6 +143,7 @@ export class ChatGPTBot {
             isPrivateChat ? this.chatgptTriggerKeyword : this.chatGroupTriggerKeyword,
             ""
         );
+        text = text.replace(isPrivateChat ? this.chatgptTriggerKeyword : "~", "");
         return text;
     }
 
@@ -156,7 +157,7 @@ export class ChatGPTBot {
                 ? text.includes(chatgptTriggerKeyword)
                 : true;
         } else {
-            triggered = text.includes(this.chatGroupTriggerKeyword);
+            triggered = text.includes(this.chatGroupTriggerKeyword) || text.includes("~");
         }
         if (triggered) {
             console.log(`🎯 ChatGPT Triggered: ${text}`);
