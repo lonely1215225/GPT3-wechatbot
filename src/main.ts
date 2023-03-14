@@ -7,9 +7,9 @@ const weChatBot = WechatyBuilder.build({
     name: "my-wechat-bot",
     puppetOptions: {
         timeoutSeconds: 60,
-        // token: "puppet_padlocal_b58032fcdb2a4baea46a47b7f2d1f3db",
+        token: "puppet_padlocal_b58032fcdb2a4baea46a47b7f2d1f3db",
     },
-    // puppet: "wechaty-puppet-padlocal"
+    puppet: "wechaty-puppet-padlocal"
 });
 // ChatGPTBot instance
 const chatGPTBot = new ChatGPTBot();
