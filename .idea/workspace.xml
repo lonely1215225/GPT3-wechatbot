@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="b02bc213-235f-46cd-9123-9ee6cd2ebd87" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/chatgpt.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/chatgpt.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/config.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/interface.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/interface.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +97,7 @@
       <workItem from="1676455352515" duration="38409000" />
       <workItem from="1676991287737" duration="107369000" />
       <workItem from="1678349613019" duration="18965000" />
-      <workItem from="1678425889666" duration="3705000" />
+      <workItem from="1678425889666" duration="16293000" />
     </task>
     <servers />
   </component>

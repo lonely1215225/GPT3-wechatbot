@@ -110,7 +110,7 @@ export class ChatGPTBot {
     }
 
     setBotName(botName: string) {
-        this.botName = Config.botName;
+        this.botName = botName;
     }
 
     // get trigger keyword in group chat: (@Name <keyword>)
@@ -143,7 +143,6 @@ export class ChatGPTBot {
             isPrivateChat ? this.chatgptTriggerKeyword : this.chatGroupTriggerKeyword,
             ""
         );
-        text = text.replace(isPrivateChat ? this.chatgptTriggerKeyword : "~", "");
         return text;
     }
 
@@ -157,7 +156,7 @@ export class ChatGPTBot {
                 ? text.includes(chatgptTriggerKeyword)
                 : true;
         } else {
-            triggered = text.includes(this.chatGroupTriggerKeyword) || text.includes("~");
+            triggered = text.includes(this.chatGroupTriggerKeyword);
         }
         if (triggered) {
             console.log(`🎯 ChatGPT Triggered: ${text}`);
@@ -307,7 +306,10 @@ export class ChatGPTBot {
         let result;
         if (gpt) {
             const txt = text.replace(" ", "");
-            if (txt.includes("img")) {
+            if (txt.includes("voice")) {
+                await this.handleTxt2Voice(text, room);
+                return;
+            } else if (txt.includes("img")) {
                 await this.handleImgMessage(text, room);
                 return;
             } else {
@@ -443,5 +445,12 @@ export class ChatGPTBot {
         const topic = await room.topic()
         await room.say(`welcome to "${topic}" 👏🏻👏🏻👏🏻!`, inviteeList[0])
 
+    }
+
+    async handleTxt2Voice(text: string, room: RoomInterface) {
+        this.OpenAI.createTranscription({
+            "file": "audio.mp3",
+            "model": "whisper-1"
+        })
     }
 }

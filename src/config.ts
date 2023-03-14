@@ -19,7 +19,6 @@ else {
         openaiOrganizationID: process.env.OPENAI_ORGANIZATION_KEY,
         chatgptTriggerKeyword: process.env.CHATGPT_TRIGGER_KEYWORD,
         welcomeToGroup: process.env.CHATGPT_TRIGGER_KEYWORD,
-        botName: process.env.BOT_NAME,
     };
 }
 
@@ -35,5 +34,4 @@ export const Config: IConfig = {
     openaiOrganizationID: configFile.openaiOrganizationID || "",
     chatgptTriggerKeyword: configFile.chatgptTriggerKeyword || "",
     welcomeToGroup: configFile.welcomeToGroup || "",
-    botName: configFile.botName || "",
 };

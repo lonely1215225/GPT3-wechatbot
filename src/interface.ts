@@ -3,5 +3,4 @@ export interface IConfig {
     openaiOrganizationID?: string;
     chatgptTriggerKeyword: string;
     welcomeToGroup: boolean;
-    botName: string;
 }
